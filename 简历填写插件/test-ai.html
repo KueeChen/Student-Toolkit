@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI解析功能测试</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        
+        .test-section h2 {
+            color: #555;
+            margin-top: 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .result {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: white;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI解析功能测试</h1>
+        
+        <div class="test-section">
+            <h2>📄 测试AI解析</h2>
+            <p>点击下面的按钮测试AI解析功能：</p>
+            <button class="btn btn-primary" id="testAiBtn">测试AI解析</button>
+            <button class="btn btn-primary" id="testServerBtn">测试服务器连接</button>
+            <div class="status" id="status"></div>
+            <div class="result" id="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>📋 测试数据</h2>
+            <p>使用以下测试数据：</p>
+            <div class="result" id="testData">
+陈慧
+13101851307
+hui_econ@163.com
+西南财经大学  公共经济制度与政策  经济学（基地班）
+
+主要课程：
+**硕士**：公共经济学研究(90)，公共政策分析(97)，政府经济管理研究(92)，中级微观经济学(87)，中级宏观经济学(87)，社会保障与社会福利专题研究(92)，社会保障与大数据应用(97)，财富管理(94)
+**本科**：微观经济学(92)，市场营销学(92)，公司金融(87)，商业银行经营管理(89)，实验与行为经济学(97)，统计学(98)，会计学(88)
+
+实习经历：
+**2025.03-2025.04 上海阅途网络科技有限公司 电销运营实习生**
+1、管理电销系统。监测电销业务的运行，及时反馈拨打名单入库、外呼接通率等方面出现的问题，调节系统外呼的速率，管理电销外包供应商的出勤。
+2、数据分析支持。从数仓提取系统运行和业绩报表，从外呼量、接通率等指标分析线路方面的问题，从单产、件均、拨打深度、T0-T9转化率分析供应商业绩变化趋势，分析拨打行为和相应结果，改进策略。
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 5000);
+        }
+        
+        async function testServerConnection() {
+            try {
+                showStatus('正在测试服务器连接...', 'info');
+                const response = await fetch('http://localhost:3001/api/parse-resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ txt: '测试连接' })
+                });
+                
+                if (response.ok) {
+                    showStatus('服务器连接正常！', 'success');
+                } else {
+                    showStatus('服务器响应错误', 'error');
+                }
+            } catch (error) {
+                showStatus('服务器连接失败: ' + error.message, 'error');
+            }
+        }
+        
+        async function testAiParsing() {
+            try {
+                const testData = document.getElementById('testData').textContent;
+                showStatus('正在使用AI解析测试数据...', 'info');
+                
+                const response = await fetch('http://localhost:3001/api/parse-resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ txt: testData })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'API调用失败');
+                }
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = JSON.stringify(result, null, 2);
+                resultDiv.style.display = 'block';
+                
+                showStatus('AI解析成功！', 'success');
+            } catch (error) {
+                showStatus('AI解析失败: ' + error.message, 'error');
+            }
+        }
+        
+        document.getElementById('testAiBtn').addEventListener('click', testAiParsing);
+        document.getElementById('testServerBtn').addEventListener('click', testServerConnection);
+    </script>
+</body>
+</html> 
